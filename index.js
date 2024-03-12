@@ -5,21 +5,21 @@ const app = express()
 app.use(cors(corsOptions))
 
 app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "https://depfront.vercel.app"); // update to match the domain you will make the request from
+    res.header("Access-Control-Allow-Origin", "https://bulk-mail-front.vercel.app/"); // update to match the domain you will make the request from
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     next();
   });
   
   app.options('*', (req, res) => { 
     // Pre-flight request. Reply successfully:
-    res.header('Access-Control-Allow-Origin', 'https://depfront.vercel.app');
+    res.header('Access-Control-Allow-Origin', 'https://bulk-mail-front.vercel.app/');
     res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
     res.header('Access-Control-Allow-Headers', 'Content-Type');
     res.send();
   });
   
 var corsOptions = {
-    origin: ["https://depfront.vercel.app/"]
+    origin: ["https://bulk-mail-front.vercel.app/"]
   };
 
 app.use(express.json())
