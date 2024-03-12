@@ -1,6 +1,14 @@
 const express = require("express")
 const cors = require("cors")
 const app = express()
+const mongoose=require("mongoose")
+mongoose.connect("mongodb+srv://sam:1234@cluster0.dcbavsw.mongodb.net/passkey?retryWrites=true&w=majority&appName=Cluster0")
+.then(()=>{
+  console.log("Database is connected Sucessfully...")
+})
+.catch(()=>{
+  console.log("Database is not connected...")
+})
 
 app.use(cors(corsOptions))
 
@@ -23,52 +31,54 @@ var corsOptions = {
   };
 
 app.use(express.json())
-
-//Install NODEMAILER
-const nodemailer = require("nodemailer");
-
-const transporter = nodemailer.createTransport({
-  service:"gmail",
-  auth: {
-    // TODO: replace `user` and `pass` values from <https://forwardemail.net>
-    user: "josesamimmanuel@gmail.com",
-    pass: "lmhu abxs yopw dhwt",
-  },
-});
-
-const emailTemplate = (message, recipient) => ({
-    from: "josesamimmanuel@gmail.com",
-    to: recipient,
-    subject: 'You get Text Message from Your App!',
-    text: message
-  });
-
-const sendMails = ({message, emailList}) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            for (const recipient of emailList) {
-                const mailOptions = emailTemplate(message, recipient);
-        
-                await transporter.sendMail(mailOptions);
-                console.log(`Email sent to ${recipient}`);
-            }
-            resolve("Success")
-        } catch (error) {
-            console.error('Error sending emails:', error.message);
-            reject(error.message)
-        }
-    })
-};
+//Create Model
+const credential=mongoose.model('credential',({
+  user:String,
+  pass:String
+}),"bulkmail")
 
 app.post("/sendemail",function(req,res){
 
-    sendMails(req.body).then((response) => {
-        console.log(response)
-        res.send(true);
-    })
-    .catch((error) => {
-        res.send(false);
-    })
+  var msg=req.body.msg
+  var emaillist=req.body.emaillist
+  credential.find()     
+.then((data)=>{
+const transporter = nodemailer.createTransport({
+  service:"gmail",
+  auth: {
+    user: data[0].toJSON().user,
+    pass: data[0].toJSON().pass,
+  },
+});
+new Promise(async(resolve,reject)=>{      //ASYNC - AWAIT
+  try{                                    //TRY-CATCH BLOCK
+    for(var i=0;i<emaillist.length;i++){
+     await transporter.sendMail({
+        from: "josesamimmanuel@gmail.com", // sender address
+        to: emaillist[i], // list of receivers
+        subject: "Hello ✔", // Subject line
+        text: msg // plain text body
+      },
+        )
+        console.log("Email sent to"+emaillist[i])
+    }
+    resolve("Sucess")
+  }
+  catch(error){
+    console.log("Error")
+    reject("Failed")
+  }
+})
+.then(()=>{
+  res.send(true)
+})
+.catch(()=>{
+  res.send(false)
+})
+})
+.catch(()=>{
+console.log("Cannot Retrive")
+})
 
 })
 
